@@ -17,3 +17,4 @@ after_success:
 
 after_script:
   - codeclimate-test-reporter < coverage/lcov.info
+  
