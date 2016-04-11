@@ -14,6 +14,9 @@
     "email": "saviogl@gmail.com",
     "url": "http://saviolucena.com"
   },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:ABS-org/passport-idsus.git"
