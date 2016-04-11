@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/ABS-org/passport-idsus/issues"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "id-sus-sdk-nodejs": "git+http://idsus-publico:idsus-publicoidsus-publico@git.lais.huol.ufrn.br/id-sus/id-sus-sdk-nodejs.git",
     "lodash.values": "4.1.0",
