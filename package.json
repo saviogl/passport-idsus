@@ -1,6 +1,6 @@
 {
   "name": "passport-idsus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "IdSus authentication strategy for Passport.",
   "main": "index.js",
   "scripts": {
