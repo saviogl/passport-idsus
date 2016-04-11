@@ -6,15 +6,8 @@ var IdsusStrategy = require('..'),
   VError = require('verror'),
   fixtures = require('./fixtures');
 
-var domain = Chance.domain();
-
 // Fake data to be used as parameter to load IdsusStrategy
-var IdsusStrategyParams = {
-  authURL: Chance.url({ domain: domain, path: '' }),
-  clientID: Chance.guid(),
-  clientSecret: Chance.guid(),
-  callbackURL: Chance.url({ domain: domain, path: 'auth/idsus/callback' })
-};
+var IdsusStrategyParams = fixtures.strategyParams;
 
 describe('Strategy', function() {
 
@@ -26,11 +19,75 @@ describe('Strategy', function() {
     });
   });
 
-  describe('constructed with undefined options', function() {
+  describe('constructed with no arguments', function() {
+    it('should throw RangeError', function() {
+      expect(function() {
+        return new IdsusStrategy();
+      }).to.throw(RangeError);
+    });
+  });
+
+  describe('constructed with wrong type first argument', function() {
     it('should throw TypeError', function() {
       expect(function() {
-        return new IdsusStrategy(undefined, function() {});
+        return new IdsusStrategy('SOMEID', function() {});
       }).to.throw(TypeError);
+    });
+  });
+
+  describe('constructed with wrong type second argument argument', function() {
+    it('should throw TypeError', function() {
+      expect(function() {
+        return new IdsusStrategy({}, {});
+      }).to.throw(TypeError);
+    });
+  });
+
+  describe('constructed with missing option key: authURL', function() {
+    it('should throw RangeError', function() {
+      expect(function() {
+        return new IdsusStrategy({
+          clientID: IdsusStrategyParams.clientID,
+          clientSecret: IdsusStrategyParams.clientSecret,
+          callbackURL: IdsusStrategyParams.callbackURL,
+        }, function() {});
+      }).to.throw(RangeError);
+    });
+  });
+
+  describe('constructed with missing option key: clientID', function() {
+    it('should throw RangeError', function() {
+      expect(function() {
+        return new IdsusStrategy({
+          authURL: IdsusStrategyParams.authURL,
+          clientSecret: IdsusStrategyParams.clientSecret,
+          callbackURL: IdsusStrategyParams.callbackURL,
+        }, function() {});
+      }).to.throw(RangeError);
+    });
+  });
+
+  describe('constructed with missing option key: clientSecret', function() {
+    it('should throw RangeError', function() {
+      expect(function() {
+        return new IdsusStrategy({
+          authURL: IdsusStrategyParams.authURL,
+          clientID: IdsusStrategyParams.clientID,
+          callbackURL: IdsusStrategyParams.callbackURL,
+        }, function() {});
+      }).to.throw(RangeError);
+    });
+  });
+
+  describe('constructed with missing option key: callbackURL', function() {
+    it('should throw RangeError', function() {
+      expect(function() {
+        return new IdsusStrategy({
+          authURL: IdsusStrategyParams.authURL,
+          clientID: IdsusStrategyParams.clientID,
+          clientSecret: IdsusStrategyParams.clientSecret,
+        }, function() {});
+      }).to.throw(RangeError);
     });
   });
 
@@ -120,6 +177,116 @@ describe('Strategy', function() {
         })
         .authenticate();
     });
+
+    after(function() {
+      nock.cleanAll();
+    });
+  });
+
+  describe('fetch user date without a valid token', function() {
+    var strategy = new IdsusStrategy(IdsusStrategyParams, function() {});
+
+    before(function() {
+      // Setup Nock inteceptor for valid token
+      nock(IdsusStrategyParams.authURL)
+        .post('/oauth/token/')
+        .reply(200, fixtures.accessToken);
+
+      // Setup Nock inteceptor for user profile
+      nock(IdsusStrategyParams.authURL)
+        .get('/api/user/')
+        .query(true)
+        .reply(401, { error: 'Invalid credentials' });
+    });
+
+    it('should fail with no Authorization Bearer header', function(done) {
+      chai.passport.use(strategy)
+        .req(function(req) {
+          req.query = {};
+          req.query.code = Chance.guid();
+        })
+        .error(function(error) {
+          expect(error).to.be.instanceof(VError);
+          expect(error.message).to.be.equal('Invalid credentials');
+          done();
+        })
+        .authenticate();
+    });
+
+    after(function() {
+      nock.cleanAll();
+    });
+  });
+
+  describe('fail retrieving user from db in verify callback', function() {
+    before(function() {
+      // Setup Nock inteceptor for valid token
+      nock(IdsusStrategyParams.authURL)
+        .post('/oauth/token/')
+        .reply(200, fixtures.accessToken);
+
+      // Setup Nock inteceptor for user profile
+      nock(IdsusStrategyParams.authURL)
+        .get('/api/user/')
+        .query(true)
+        .reply(200, fixtures.userSchema);
+    });
+
+    it('should fail with Error instance passed to verify done argument function', function(done) {
+      var strategy = new IdsusStrategy(IdsusStrategyParams, function(accessToken, tokenType, expiresIn, refreshToken, scope, user, done) {
+        done(new Error('Could not find user'));
+      });
+
+      chai.passport.use(strategy)
+        .req(function(req) {
+          req.query = {};
+          req.query.code = Chance.guid();
+        })
+        .error(function(error) {
+          expect(error).to.be.instanceof(Error);
+          expect(error.message).to.be.equal('Could not find user');
+          done();
+        })
+        .authenticate();
+    });
+
+    after(function() {
+      nock.cleanAll();
+    });
+  });
+
+  describe('fail sending empty user to done callback function', function() {
+    before(function() {
+      // Setup Nock inteceptor for valid token
+      nock(IdsusStrategyParams.authURL)
+        .post('/oauth/token/')
+        .reply(200, fixtures.accessToken);
+
+      // Setup Nock inteceptor for user profile
+      nock(IdsusStrategyParams.authURL)
+        .get('/api/user/')
+        .query(true)
+        .reply(200, fixtures.userSchema);
+    });
+
+    /* jshint ignore:start */
+    it('should fail with no further parametes', function(done) {
+      var strategy = new IdsusStrategy(IdsusStrategyParams, function(accessToken, tokenType, expiresIn, refreshToken, scope, user, done) {
+        done(null, null);
+      });
+
+      chai.passport.use(strategy)
+        .req(function(req) {
+          req.query = {};
+          req.query.code = Chance.guid();
+        })
+        .fail(function(info) {
+          expect(info).to.be.undefined;
+          done();
+        })
+        .authenticate();
+    });
+    /* jshint ignore:end */
 
     after(function() {
       nock.cleanAll();
