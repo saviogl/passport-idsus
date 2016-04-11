@@ -35,6 +35,7 @@
     "chai": "3.5.0",
     "chai-passport-strategy": "1.0.0",
     "chance": "1.0.1",
+    "codeclimate-test-reporter": "0.3.1",
     "istanbul": "0.4.3",
     "mocha": "2.4.5",
     "mocha-jshint": "2.3.1",
