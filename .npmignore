@@ -1,0 +1,6 @@
+coverage/
+test/
+
+.jshintrc
+.jshintignore
+.travis.yml
