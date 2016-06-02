@@ -172,7 +172,6 @@ describe('Strategy', function() {
         })
         .error(function(error) {
           expect(error).to.be.instanceof(VError);
-          expect(error.message).to.be.equal('invalid_grant');
           done();
         })
         .authenticate();
