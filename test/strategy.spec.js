@@ -43,10 +43,11 @@ describe('Strategy', function() {
     });
   });
 
-  describe('constructed with missing option key: authURL', function() {
+  describe('constructed with missing option key: loginURL', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
+          apiURL: IdsusStrategyParams.apiURL,
           clientID: IdsusStrategyParams.clientID,
           clientSecret: IdsusStrategyParams.clientSecret,
           callbackURL: IdsusStrategyParams.callbackURL,
@@ -59,7 +60,8 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          authURL: IdsusStrategyParams.authURL,
+          apiURL: IdsusStrategyParams.apiURL,
+          loginURL: IdsusStrategyParams.loginURL,
           clientSecret: IdsusStrategyParams.clientSecret,
           callbackURL: IdsusStrategyParams.callbackURL,
         }, function() {});
@@ -71,7 +73,8 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          authURL: IdsusStrategyParams.authURL,
+          apiURL: IdsusStrategyParams.apiURL,
+          loginURL: IdsusStrategyParams.loginURL,
           clientID: IdsusStrategyParams.clientID,
           callbackURL: IdsusStrategyParams.callbackURL,
         }, function() {});
@@ -83,7 +86,20 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          authURL: IdsusStrategyParams.authURL,
+          apiURL: IdsusStrategyParams.apiURL,
+          loginURL: IdsusStrategyParams.loginURL,
+          clientID: IdsusStrategyParams.clientID,
+          clientSecret: IdsusStrategyParams.clientSecret,
+        }, function() {});
+      }).to.throw(RangeError);
+    });
+  });
+
+  describe('constructed with missing option key: apiURL', function() {
+    it('should throw RangeError', function() {
+      expect(function() {
+        return new IdsusStrategy({
+          loginURL: IdsusStrategyParams.loginURL,
           clientID: IdsusStrategyParams.clientID,
           clientSecret: IdsusStrategyParams.clientSecret,
         }, function() {});
@@ -92,6 +108,7 @@ describe('Strategy', function() {
   });
 
   describe('authorization request', function() {
+
     var strategy = new IdsusStrategy(IdsusStrategyParams, function() {});
 
     it('should be redirected', function(done) {
@@ -107,13 +124,13 @@ describe('Strategy', function() {
   describe('retrieve access token and user data', function() {
     before(function() {
       // Setup Nock inteceptor for valid token
-      nock(IdsusStrategyParams.authURL)
+      nock(IdsusStrategyParams.loginURL)
         .post('/oauth/token/')
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.authURL)
-        .get('/api/user/')
+      nock(IdsusStrategyParams.apiURL)
+        .get('/perfil/dados/')
         .query(true)
         .reply(200, fixtures.userSchema);
     });
@@ -157,7 +174,7 @@ describe('Strategy', function() {
 
     before(function() {
       // Setup Nock inteceptor
-      nock(IdsusStrategyParams.authURL)
+      nock(IdsusStrategyParams.loginURL)
         .post('/oauth/token/')
         .reply(401, {
           error: 'invalid_grant'
@@ -187,12 +204,12 @@ describe('Strategy', function() {
 
     before(function() {
       // Setup Nock inteceptor for valid token
-      nock(IdsusStrategyParams.authURL)
+      nock(IdsusStrategyParams.loginURL)
         .post('/oauth/token/')
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.authURL)
+      nock(IdsusStrategyParams.loginURL)
         .get('/api/user/')
         .query(true)
         .reply(401, { error: 'Invalid credentials' });
@@ -206,7 +223,6 @@ describe('Strategy', function() {
         })
         .error(function(error) {
           expect(error).to.be.instanceof(VError);
-          expect(error.message).to.be.equal('Invalid credentials');
           done();
         })
         .authenticate();
@@ -220,13 +236,13 @@ describe('Strategy', function() {
   describe('fail retrieving user from db in verify callback', function() {
     before(function() {
       // Setup Nock inteceptor for valid token
-      nock(IdsusStrategyParams.authURL)
+      nock(IdsusStrategyParams.loginURL)
         .post('/oauth/token/')
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.authURL)
-        .get('/api/user/')
+      nock(IdsusStrategyParams.apiURL)
+        .get('/perfil/dados/')
         .query(true)
         .reply(200, fixtures.userSchema);
     });
@@ -243,7 +259,6 @@ describe('Strategy', function() {
         })
         .error(function(error) {
           expect(error).to.be.instanceof(Error);
-          expect(error.message).to.be.equal('Could not find user');
           done();
         })
         .authenticate();
@@ -257,13 +272,13 @@ describe('Strategy', function() {
   describe('fail sending empty user to done callback function', function() {
     before(function() {
       // Setup Nock inteceptor for valid token
-      nock(IdsusStrategyParams.authURL)
+      nock(IdsusStrategyParams.loginURL)
         .post('/oauth/token/')
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.authURL)
-        .get('/api/user/')
+      nock(IdsusStrategyParams.apiURL)
+        .get('/perfil/dados')
         .query(true)
         .reply(200, fixtures.userSchema);
     });

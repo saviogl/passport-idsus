@@ -30,7 +30,8 @@ The SUSConectaLogin authentication strategy authenticates users using a SUSConec
 
 ```js
 passport.use(new IdSUSStrategy({
-    authURL: SUSCONECTALOGIN_HOST,
+    loginURL: SUSCONECTALOGIN_HOST,
+    apiURL: SUSCONECTALOGIN_API,
     clientID: SUSCONECTALOGIN_APP_CLIENTID,
     clientSecret: SUSCONECTALOGIN_APP_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/idsus/callback" // Must match the callback registered in the app
