@@ -13,7 +13,6 @@ describe('Strategy', function() {
 
   describe('constructed', function() {
     var strategy = new IdsusStrategy(IdsusStrategyParams, function() {});
-
     it('should be named idsus', function() {
       expect(strategy.name).to.equal('idsus');
     });
@@ -47,7 +46,7 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          apiURL: IdsusStrategyParams.apiURL,
+          domain: IdsusStrategyParams.domain,
           clientID: IdsusStrategyParams.clientID,
           clientSecret: IdsusStrategyParams.clientSecret,
           callbackURL: IdsusStrategyParams.callbackURL,
@@ -60,8 +59,7 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          apiURL: IdsusStrategyParams.apiURL,
-          loginURL: IdsusStrategyParams.loginURL,
+          domain: IdsusStrategyParams.domain,
           clientSecret: IdsusStrategyParams.clientSecret,
           callbackURL: IdsusStrategyParams.callbackURL,
         }, function() {});
@@ -73,8 +71,7 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          apiURL: IdsusStrategyParams.apiURL,
-          loginURL: IdsusStrategyParams.loginURL,
+          domain: IdsusStrategyParams.domain,
           clientID: IdsusStrategyParams.clientID,
           callbackURL: IdsusStrategyParams.callbackURL,
         }, function() {});
@@ -86,8 +83,7 @@ describe('Strategy', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          apiURL: IdsusStrategyParams.apiURL,
-          loginURL: IdsusStrategyParams.loginURL,
+          domain: IdsusStrategyParams.domain,
           clientID: IdsusStrategyParams.clientID,
           clientSecret: IdsusStrategyParams.clientSecret,
         }, function() {});
@@ -95,11 +91,10 @@ describe('Strategy', function() {
     });
   });
 
-  describe('constructed with missing option key: apiURL', function() {
+  describe('constructed with missing option key: domain', function() {
     it('should throw RangeError', function() {
       expect(function() {
         return new IdsusStrategy({
-          loginURL: IdsusStrategyParams.loginURL,
           clientID: IdsusStrategyParams.clientID,
           clientSecret: IdsusStrategyParams.clientSecret,
         }, function() {});
@@ -124,12 +119,12 @@ describe('Strategy', function() {
   describe('retrieve access token and user data', function() {
     before(function() {
       // Setup Nock inteceptor for valid token
-      nock(IdsusStrategyParams.loginURL)
+      nock('https://login.' + IdsusStrategyParams.domain)
         .post('/oauth/token/')
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.apiURL)
+      nock('https://api.' + IdsusStrategyParams.domain)
         .get('/perfil/dados/')
         .query(true)
         .reply(200, fixtures.userSchema);
@@ -241,7 +236,7 @@ describe('Strategy', function() {
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.apiURL)
+      nock(IdsusStrategyParams.domain)
         .get('/perfil/dados/')
         .query(true)
         .reply(200, fixtures.userSchema);
@@ -277,7 +272,7 @@ describe('Strategy', function() {
         .reply(200, fixtures.accessToken);
 
       // Setup Nock inteceptor for user profile
-      nock(IdsusStrategyParams.apiURL)
+      nock(IdsusStrategyParams.domain)
         .get('/perfil/dados')
         .query(true)
         .reply(200, fixtures.userSchema);
