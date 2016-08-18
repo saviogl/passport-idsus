@@ -42,18 +42,6 @@ describe('Strategy', function() {
     });
   });
 
-  describe('constructed with missing option key: loginURL', function() {
-    it('should throw RangeError', function() {
-      expect(function() {
-        return new IdsusStrategy({
-          domain: IdsusStrategyParams.domain,
-          clientID: IdsusStrategyParams.clientID,
-          clientSecret: IdsusStrategyParams.clientSecret,
-          callbackURL: IdsusStrategyParams.callbackURL,
-        }, function() {});
-      }).to.throw(RangeError);
-    });
-  });
 
   describe('constructed with missing option key: clientID', function() {
     it('should throw RangeError', function() {
